@@ -20,6 +20,13 @@ async function run() {
     try {
         const appointmentOptionCollection = client.db('doctorsPortal').collection('appointmentOptions');
 
+        //all appointment Option api
+        app.get('/appointmentOptions', async(req, res)=>{
+            const query = {};
+            const options = await appointmentOptionCollection.find(query).toArray();
+            res.send(options);
+        })
+
     }
     finally {
 
