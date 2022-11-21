@@ -22,9 +22,25 @@ async function run() {
         const bookingsCollection = client.db('doctorsPortal').collection('bookings');
 
         //all appointment Option api
+        // Use Aggregate to query multiple collection and then merge data
         app.get('/appointmentOptions', async (req, res) => {
+            const date = req.query.date;
+            //console.log(date);
             const query = {};
             const options = await appointmentOptionCollection.find(query).toArray();
+
+            // get the bookings of the provided date
+            const bookingQuery = { appointmentDate: date };
+            const alreadyBooked = await bookingsCollection.find(bookingQuery).toArray();
+            //console.log(alreadyBooked);
+
+            // find the Bookedslots for a specific date
+            options.forEach(option => {
+                const optionBooked = alreadyBooked.filter(book => book.treatment === option.name);
+                //console.log(optionBooked);
+                const bookedSlots = optionBooked.map(booked => booked.slot);
+                console.log(date, option.name, bookedSlots);
+            })
             res.send(options);
         })
 
