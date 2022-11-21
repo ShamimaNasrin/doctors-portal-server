@@ -47,6 +47,14 @@ async function run() {
             res.send(options);
         })
 
+        //bookings api for specific user
+        app.get('/bookings', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const bookings = await bookingsCollection.find(query).toArray();
+            res.send(bookings);
+        })
+
         //sent booking info to mongodb
         app.post('/bookings', async (req, res) => {
             const bookingData = req.body;
