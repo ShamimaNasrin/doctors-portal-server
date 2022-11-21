@@ -20,6 +20,7 @@ async function run() {
     try {
         const appointmentOptionCollection = client.db('doctorsPortal').collection('appointmentOptions');
         const bookingsCollection = client.db('doctorsPortal').collection('bookings');
+        const usersCollection = client.db('doctorsPortal').collection('users');
 
         //all appointment Option api
         // Use Aggregate to query multiple collection and then merge data
@@ -73,7 +74,14 @@ async function run() {
 
             const result = await bookingsCollection.insertOne(bookingData);
             res.send(result);
-        })
+        });
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        });
 
     }
     finally {
@@ -81,8 +89,6 @@ async function run() {
     }
 }
 run().catch(e => console.error(e));
-
-
 
 
 app.get('/', async (req, res) => {
