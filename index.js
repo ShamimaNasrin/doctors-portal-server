@@ -81,8 +81,12 @@ async function run() {
             const email = req.query.email;
             const query = { email: email };
             const user = await usersCollection.findOne(query);
-            console.log(user);
-            res.send({ accessToken: 'token' })
+            //console.log(user);
+            if(user){
+                const token = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1d'})
+                return res.send({accessToken: token});
+            }
+            res.status(403).send({accessToken: ''})
         });
 
         //sent user info to mongodb
