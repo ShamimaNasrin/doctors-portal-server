@@ -73,10 +73,15 @@ async function run() {
         })
 
         //bookings api for specific user
-        app.get('/bookings', async (req, res) => {
-            //at first verify here
-            //console.log('token from client:',req.headers.authorization);
+        app.get('/bookings', verifyJWT, async (req, res) => {
             const email = req.query.email;
+
+            //check user
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+
             const query = { email: email };
             const bookings = await bookingsCollection.find(query).toArray();
             res.send(bookings);
