@@ -11,6 +11,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+//verify the token
+function verifyJWT(req, res, next) {
+
+    //secondly verify here
+    //console.log('token from client:',req.headers.authorization);
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send('unauthorized access');
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden access' })
+        }
+        req.decoded = decoded;
+        next();
+    })
+
+}
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.klfob8q.mongodb.net/?retryWrites=true&w=majority`;
@@ -51,6 +74,8 @@ async function run() {
 
         //bookings api for specific user
         app.get('/bookings', async (req, res) => {
+            //at first verify here
+            //console.log('token from client:',req.headers.authorization);
             const email = req.query.email;
             const query = { email: email };
             const bookings = await bookingsCollection.find(query).toArray();
@@ -82,12 +107,12 @@ async function run() {
             const email = req.query.email;
             const query = { email: email };
             const user = await usersCollection.findOne(query);
-            //console.log(user);
-            if(user){
-                const token = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1d'})
-                return res.send({accessToken: token});
+            console.log(user);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' })
+                return res.send({ accessToken: token });
             }
-            res.status(403).send({accessToken: ''})
+            res.status(403).send({ accessToken: '' })
         });
 
         //sent user info to mongodb
