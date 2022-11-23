@@ -15,7 +15,7 @@ app.use(express.json());
 function verifyJWT(req, res, next) {
 
     //secondly verify here
-    //console.log('token from client:',req.headers.authorization);
+    // console.log('token from client:',req.headers.authorization);
 
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -24,8 +24,9 @@ function verifyJWT(req, res, next) {
 
     const token = authHeader.split(' ')[1];
 
-    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
         if (err) {
+            console.log(err)
             return res.status(403).send({ message: 'forbidden access' })
         }
         req.decoded = decoded;
@@ -73,14 +74,16 @@ async function run() {
         })
 
         //bookings api for specific user
-        app.get('/bookings', async (req, res) => {
+        app.get('/bookings', verifyJWT, async (req, res) => {
             const email = req.query.email;
 
+
             //check user
-            // const decodedEmail = req.decoded.email;
-            // if (email !== decodedEmail) {
-            //     return res.status(403).send({ message: 'forbidden access' });
-            // }
+            const decodedEmail = req.decoded.email;
+            //console.log(email,decodedEmail)
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
 
             const query = { email: email };
             const bookings = await bookingsCollection.find(query).toArray();
